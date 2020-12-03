@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  # Server container
+  nginx:
+    build:
+      context: docker/dev/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www
+      - ./docker/dev/nginx/logs:/var/log/nginx
+    ports:
+      # Laravel port
+      - 8081:81
+    links:
+      - app
+
+  # PHP FastCGI Process Manager container
+  app:
+    build:
+      context: docker/dev/app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/var/www/app
+    environment:
+      # If you down want to use xDebug, set remote_enable=0
+      XDEBUG_CONFIG: "remote_host=172.17.0.1 remote_enable=1"
+      PHP_IDE_CONFIG: "serverName=Docker"
+
+volumes:
+  database:
+    driver: local
